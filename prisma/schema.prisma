@@ -1,0 +1,290 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+enum TicketStatus {
+  OPEN
+  ACTIVE
+  CLOSED
+}
+
+enum MembershipTier {
+  CORE
+  SIGNATURE
+  FOUNDER
+}
+
+model User {
+  id               String           @id @default(cuid())
+  name             String?
+  email            String?          @unique
+  emailVerified    DateTime?
+  image            String?
+  role             UserRole         @default(CUSTOMER)
+  carts            Cart[]
+  orders           Order[]
+  accounts         Account[]
+  sessions         Session[]
+  customBuilds     CustomBuild[]
+  wishlistItems    WishlistItem[]
+  supportTickets   SupportTicket[]
+  memberships      Membership[]
+  warranties       Warranty[]
+  subscriptions    Subscription[]
+  comparisonItems  ComparisonItem[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Product {
+  id            String           @id @default(cuid())
+  slug          String           @unique
+  name          String
+  description   String
+  price         Int
+  compareAt     Int?
+  inventory     Int
+  heroImage     String?
+  variants      ProductVariant[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  customBuilds  CustomBuild[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model ProductVariant {
+  id            String        @id @default(cuid())
+  sku           String        @unique
+  name          String
+  productId     String
+  priceDelta    Int           @default(0)
+  stock         Int
+  metadata      Json
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model CustomBuild {
+  id              String      @id @default(cuid())
+  userId          String?
+  productId       String
+  slug            String      @unique
+  name            String
+  configuration   Json
+  previewImage    String?
+  price           Int
+  isSaved         Boolean     @default(false)
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Cart {
+  id            String      @id @default(cuid())
+  userId        String?
+  token         String      @unique
+  status        String      @default("ACTIVE")
+  currency      String      @default("USD")
+  items         CartItem[]
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model CartItem {
+  id            String      @id @default(cuid())
+  cartId        String
+  productId     String
+  variantId     String?
+  quantity      Int         @default(1)
+  unitPrice     Int
+  configuration Json?
+  cart          Cart        @relation(fields: [cartId], references: [id], onDelete: Cascade)
+}
+
+model Coupon {
+  id            String      @id @default(cuid())
+  code          String      @unique
+  type          String
+  value         Int
+  active        Boolean     @default(true)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  usageLimit    Int?
+  usageCount    Int         @default(0)
+}
+
+model Order {
+  id                String        @id @default(cuid())
+  userId            String?
+  stripeSessionId   String?       @unique
+  status            OrderStatus   @default(PENDING)
+  subtotal          Int
+  discount          Int           @default(0)
+  shipping          Int           @default(0)
+  total             Int
+  currency          String        @default("USD")
+  shippingAddress   Json
+  trackingCode      String?
+  paymentLogs       PaymentLog[]
+  items             OrderItem[]
+  shipment          Shipment?
+  user              User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model OrderItem {
+  id              String      @id @default(cuid())
+  orderId         String
+  productId       String
+  title           String
+  quantity        Int
+  unitPrice       Int
+  configuration   Json?
+  order           Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model Shipment {
+  id             String      @id @default(cuid())
+  orderId        String      @unique
+  carrier        String
+  service        String
+  status         String
+  eta            DateTime?
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model PaymentLog {
+  id             String      @id @default(cuid())
+  orderId        String
+  provider       String
+  eventType      String
+  eventId        String      @unique
+  payload        Json
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt      DateTime    @default(now())
+}
+
+model WishlistItem {
+  id             String      @id @default(cuid())
+  userId         String
+  productId      String
+  configuration  Json?
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model ComparisonItem {
+  id             String      @id @default(cuid())
+  userId         String
+  productId      String
+  notes          String?
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Review {
+  id             String      @id @default(cuid())
+  productId      String
+  author         String
+  rating         Int
+  body           String
+  approved       Boolean     @default(false)
+  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt      DateTime    @default(now())
+}
+
+model SupportTicket {
+  id             String      @id @default(cuid())
+  userId         String
+  subject        String
+  body           String
+  status         TicketStatus @default(OPEN)
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime    @default(now())
+}
+
+model Membership {
+  id             String         @id @default(cuid())
+  userId         String
+  tier           MembershipTier @default(CORE)
+  startedAt      DateTime       @default(now())
+  expiresAt      DateTime?
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Warranty {
+  id             String      @id @default(cuid())
+  userId         String
+  serialNumber   String      @unique
+  expiresAt      DateTime
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id             String      @id @default(cuid())
+  userId         String
+  title          String
+  status         String
+  renewsAt       DateTime?
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
