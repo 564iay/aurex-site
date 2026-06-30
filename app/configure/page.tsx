@@ -1,7 +1,9 @@
 "use client";
 
-import { ConfiguratorStudio } from "@/components/configurator/configurator-studio";
+import dynamic from "next/dynamic";
 import { CommercePageShell } from "@/components/commerce/commerce-page-shell";
+
+const ConfiguratorStudio = dynamic(() => import("@/components/configurator/configurator-studio"), { ssr: false });
 
 export default function ConfigurePage() {
   return (

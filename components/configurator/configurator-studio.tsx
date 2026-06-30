@@ -115,7 +115,7 @@ function ConfigurableModel({
   );
 }
 
-export function ConfiguratorStudio() {
+export default function ConfiguratorStudio() {
   const addToCart = useCommerceStore((state) => state.addToCart);
   const [state, setState] = useState<ConfiguratorState>({
     bodyColor: "#141414",
