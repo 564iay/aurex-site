@@ -1,9 +1,8 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame, useLoader } from "@react-three/fiber";
-import { Environment, Float, MeshTransmissionMaterial, Sparkles } from "@react-three/drei";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Environment, Float, MeshTransmissionMaterial, Sparkles, useGLTF } from "@react-three/drei";
 import {
   Box3,
   Color,
@@ -43,7 +42,7 @@ function SceneRig({
 }: ProductCanvasProps) {
   const modelRef = useRef<Group>(null);
   const pointerRef = useRef({ x: 0, y: 0 });
-  const scene = useLoader(OBJLoader, "/models/Headphones.obj");
+  const { scene } = useGLTF("/models/Headphones.glb");
 
   useEffect(() => {
     const handlePointerMove = (event: MouseEvent) => {
@@ -215,3 +214,5 @@ export default function ProductCanvas(props: ProductCanvasProps) {
     </div>
   );
 }
+
+useGLTF.preload("/models/Headphones.glb");
