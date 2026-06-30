@@ -66,19 +66,33 @@ function SceneRig({
     clone.position.sub(center);
     clone.scale.setScalar(scale);
 
-    let meshIndex = 0;
     clone.traverse((object: Object3D) => {
       if (!(object instanceof Mesh)) {
         return;
       }
 
+      // Ensure bounding box is computed
+      if (!object.geometry.boundingBox) {
+        object.geometry.computeBoundingBox();
+      }
+
+      const meshCenter = new Vector3();
+      object.geometry.boundingBox!.getCenter(meshCenter);
+
       object.castShadow = true;
       object.receiveShadow = true;
       object.userData.basePosition = object.position.clone();
-      object.userData.explodeIndex = meshIndex;
-      meshIndex += 1;
+      object.userData.baseQuaternion = object.quaternion.clone();
 
-      const isLuxuryAccent = object.position.y > 0.3 || object.position.x > 0.2;
+      // Use the geometry center for the explosion direction instead of local position
+      const explodeDir = meshCenter.clone().normalize();
+
+      // We still add the explosion offset to the object's local position (which might be 0,0,0)
+      object.userData.explodeTarget = object.position
+        .clone()
+        .add(explodeDir.multiplyScalar(0.4 + Math.random() * 0.2));
+
+      const isLuxuryAccent = meshCenter.y > 0.3 || meshCenter.x > 0.2;
       object.material = new MeshPhysicalMaterial({
         color: new Color(isLuxuryAccent ? "#d7b46a" : selectedColor),
         metalness: isLuxuryAccent ? 1 : 0.92,
