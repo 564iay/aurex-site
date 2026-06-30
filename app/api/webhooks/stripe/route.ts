@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         provider: "stripe",
         eventType: event.type,
         eventId: event.id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         payload: session as any,
         order: {
           create: {
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
             total: Number(session.amount_total ?? 0),
             shipping: Number(session.total_details?.amount_shipping ?? 0),
             discount: Number(session.total_details?.amount_discount ?? 0),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             shippingAddress: (session.customer_details as any) ?? {},
             status: "PAID",
             currency: session.currency?.toUpperCase() ?? "USD",
