@@ -1,3 +1,22 @@
+const partLabels = [
+  {
+    label: "40mm Driver Array",
+    copy: "Custom-wound neodymium drivers tuned to AUREX's reference curve, delivering a 6 Hz–40 kHz response with zero harmonic colouring."
+  },
+  {
+    label: "Acoustic Chamber",
+    copy: "A precision-damped internal volume calculated by finite-element analysis, eliminating resonance peaks that conventional headphones hide with EQ."
+  },
+  {
+    label: "Floating Yoke",
+    copy: "Tri-axis articulation absorbs head movement without slipping, maintaining consistent driver-to-ear distance for repeatable imaging on every listen."
+  },
+  {
+    label: "Touch Crystal Surface",
+    copy: "Haptic-mapped sapphire glass registers swipe velocity, pressure, and dwell time — enabling 14 distinct gestures without a single visible button."
+  }
+];
+
 export function ExplodedSection() {
   return (
     <section
@@ -13,12 +32,10 @@ export function ExplodedSection() {
             cushion geometry, and weight-balanced frame.
           </p>
           <div className="mt-10 grid gap-4 md:grid-cols-2">
-            {["40mm Driver Array", "Acoustic Chamber", "Floating Yoke", "Touch Crystal Surface"].map((label) => (
+            {partLabels.map(({ label, copy }) => (
               <div key={label} className="gradient-stroke rounded-2xl p-5">
                 <p className="text-sm uppercase tracking-[0.22em] text-[rgba(215,180,106,0.8)]">{label}</p>
-                <p className="mt-3 text-sm leading-7 text-white/62">
-                  Scroll control increases separation while preserving a premium, museum-like presentation.
-                </p>
+                <p className="mt-3 text-sm leading-7 text-white/62">{copy}</p>
               </div>
             ))}
           </div>
@@ -26,9 +43,18 @@ export function ExplodedSection() {
         <div className="glass-panel rounded-[2rem] p-8">
           <div className="space-y-8">
             {[
-              ["Transparent shell", "A ghosted finish mode lets the internal construction read like an engineered artifact."],
-              ["Part labels", "Feature callouts are presented as editorial annotations rather than technical clutter."],
-              ["Scroll choreography", "The scene expands and resolves fluidly to keep the experience controlled and elegant."]
+              [
+                "Transparent shell",
+                "A ghosted finish mode lets the internal construction read like an engineered artifact."
+              ],
+              [
+                "Part labels",
+                "Feature callouts are presented as editorial annotations rather than technical clutter."
+              ],
+              [
+                "Scroll choreography",
+                "The scene expands and resolves fluidly to keep the experience controlled and elegant."
+              ]
             ].map(([title, copy]) => (
               <div key={title}>
                 <div className="gold-line mb-4 w-16" />

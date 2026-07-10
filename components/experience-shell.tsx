@@ -46,10 +46,13 @@ export function ExperienceShell() {
   const [ready, setReady] = useState(false);
   const [scenePhase, setScenePhase] = useState<ScenePhase>("hero");
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [luxMode, setLuxMode] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     const sections = gsap.utils.toArray<HTMLElement>("[data-scene-phase]");
     const triggers = sections.map((section) =>
@@ -58,22 +61,26 @@ export function ExperienceShell() {
         start: "top center",
         end: "bottom center",
         onEnter: () => setScenePhase(section.dataset.scenePhase as ScenePhase),
-        onEnterBack: () => setScenePhase(section.dataset.scenePhase as ScenePhase)
+        onEnterBack: () =>
+          setScenePhase(section.dataset.scenePhase as ScenePhase)
       })
     );
 
-    const progressTrigger = ScrollTrigger.create({
-      trigger: document.body,
-      start: "top top",
-      end: "bottom bottom",
-      onUpdate: (self) => setScrollProgress(self.progress)
-    });
+    let progressTrigger: ScrollTrigger | null = null;
+    if (!prefersReducedMotion) {
+      progressTrigger = ScrollTrigger.create({
+        trigger: document.body,
+        start: "top top",
+        end: "bottom bottom",
+        onUpdate: (self) => setScrollProgress(self.progress)
+      });
+    }
 
     const loadTimer = window.setTimeout(() => setReady(true), 1400);
 
     return () => {
       triggers.forEach((trigger) => trigger.kill());
-      progressTrigger.kill();
+      progressTrigger?.kill();
       window.clearTimeout(loadTimer);
     };
   }, []);
@@ -84,10 +91,10 @@ export function ExperienceShell() {
         selectedColor={selectedColor}
         scenePhase={scenePhase}
         scrollProgress={scrollProgress}
-        luxMode={luxMode}
+        luxMode={false}
       />
     ),
-    [luxMode, scenePhase, scrollProgress, selectedColor]
+    [scenePhase, scrollProgress, selectedColor]
   );
 
   return (
@@ -114,7 +121,7 @@ export function ExperienceShell() {
         <ColorSection selectedColor={selectedColor} onColorChange={setSelectedColor} />
         <EcosystemSection />
         <TestimonialsSection />
-        <BuySection onToggleLuxMode={() => setLuxMode((current) => !current)} />
+        <BuySection selectedColor={selectedColor} />
       </motion.div>
     </main>
   );

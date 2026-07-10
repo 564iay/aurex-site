@@ -231,3 +231,38 @@ a,
     cursor: pointer;
   }
 }
+
+/* Shimmer animation for reservation CTA */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s linear infinite;
+}
+
+/* Reduced-motion: disable all animations for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .luxury-shell {
+    scroll-snap-type: none;
+  }
+
+  .card-shine::after {
+    display: none;
+  }
+
+  .equalizer-bar {
+    animation: none;
+    transform: scaleY(0.6);
+  }
+}

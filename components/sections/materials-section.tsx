@@ -2,7 +2,38 @@
 
 import { motion } from "framer-motion";
 
-import { materials } from "@/lib/content";
+const materialData = [
+  {
+    name: "Brushed Titanium",
+    description:
+      "Cold to the touch, warm to the eye. A directional brushed finish resists fingerprints while telegraphing structural confidence across every surface.",
+    bg: "linear-gradient(145deg, #57595e, #1f2227)"
+  },
+  {
+    name: "Vegan Leather",
+    description:
+      "Responsibly sourced bio-leather wraps the headband with a softness that breaks in like a favourite jacket — gaining character without compromise.",
+    bg: "linear-gradient(145deg, #5d4435, #23150f)"
+  },
+  {
+    name: "Precision Aluminum",
+    description:
+      "CNC-machined to within 0.01 mm, the yoke arms flex under real load then snap back to silence — a tolerance invisible until it matters.",
+    bg: "linear-gradient(145deg, #aeb4bd, #51565d)"
+  },
+  {
+    name: "Memory Foam",
+    description:
+      "Medical-grade viscoelastic foam maps to your skull geometry in seconds, distributing pressure evenly so four hours feels identical to four minutes.",
+    bg: "radial-gradient(circle at 30% 30%, #f2e8d7, #988f81)"
+  },
+  {
+    name: "Sapphire Glass Touch Surface",
+    description:
+      "Scratch-hardness of 9 Mohs and optical clarity let the capacitive touch layer sit below the surface, making the interface feel like thought.",
+    bg: "linear-gradient(145deg, rgba(152,197,255,0.45), rgba(255,255,255,0.12), rgba(19,26,37,0.95))"
+  }
+];
 
 export function MaterialsSection() {
   return (
@@ -15,9 +46,9 @@ export function MaterialsSection() {
         <p className="eyebrow mb-4">Premium Materials</p>
         <h2 className="section-title max-w-3xl">A tactile palette for sound worth holding onto.</h2>
         <div className="mt-12 grid gap-5 lg:grid-cols-5">
-          {materials.map((item, index) => (
+          {materialData.map((item, index) => (
             <motion.article
-              key={item}
+              key={item.name}
               className="glass-panel card-shine min-h-[300px] rounded-[2rem] p-6"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -26,23 +57,12 @@ export function MaterialsSection() {
             >
               <div
                 className="h-40 rounded-[1.5rem]"
-                style={{
-                  background:
-                    index === 0
-                      ? "linear-gradient(145deg, #57595e, #1f2227)"
-                      : index === 1
-                        ? "linear-gradient(145deg, #5d4435, #23150f)"
-                        : index === 2
-                          ? "linear-gradient(145deg, #aeb4bd, #51565d)"
-                          : index === 3
-                            ? "radial-gradient(circle at 30% 30%, #f2e8d7, #988f81)"
-                            : "linear-gradient(145deg, rgba(152,197,255,0.45), rgba(255,255,255,0.12), rgba(19,26,37,0.95))"
-                }}
+                style={{ background: item.bg }}
+                role="img"
+                aria-label={`${item.name} material swatch`}
               />
-              <h3 className="mt-6 font-display text-3xl uppercase tracking-[0.12em] text-white">{item}</h3>
-              <p className="mt-4 text-sm leading-7 text-white/62">
-                Carefully chosen finishes create a restrained luxury that reads through light, texture, and touch.
-              </p>
+              <h3 className="mt-6 font-display text-3xl uppercase tracking-[0.12em] text-white">{item.name}</h3>
+              <p className="mt-4 text-sm leading-7 text-white/62">{item.description}</p>
             </motion.article>
           ))}
         </div>

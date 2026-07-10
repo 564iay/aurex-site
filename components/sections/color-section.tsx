@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import clsx from "clsx";
 
 import { colors } from "@/lib/content";
@@ -10,6 +11,9 @@ type ColorSectionProps = {
 };
 
 export function ColorSection({ selectedColor, onColorChange }: ColorSectionProps) {
+  const announcerId = useId();
+  const selectedName = colors.find((c) => c.value === selectedColor)?.name ?? "";
+
   return (
     <section
       data-scene-phase="colors"
@@ -24,16 +28,31 @@ export function ColorSection({ selectedColor, onColorChange }: ColorSectionProps
             inside a swatch strip.
           </p>
         </div>
-        <div className="grid gap-4">
+
+        {/* Accessible live region announces color change to screen readers */}
+        <div
+          id={announcerId}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {selectedName} selected
+        </div>
+
+        <div className="grid gap-4" role="radiogroup" aria-label="Headphone finish color selection">
           {colors.map((color) => (
             <button
               key={color.value}
               type="button"
+              role="radio"
+              aria-checked={selectedColor === color.value}
+              aria-label={`Select ${color.name} finish`}
               onClick={() => onColorChange(color.value)}
               className={clsx(
                 "glass-panel flex items-center justify-between rounded-[1.5rem] px-6 py-5 text-left transition",
                 selectedColor === color.value
-                  ? "border-[rgba(215,180,106,0.45)] shadow-gold"
+                  ? "border-[rgba(215,180,106,0.45)] shadow-[0_0_24px_rgba(215,180,106,0.12)]"
                   : "border-white/10 hover:border-white/25"
               )}
             >
@@ -41,7 +60,11 @@ export function ColorSection({ selectedColor, onColorChange }: ColorSectionProps
                 <p className="text-xl uppercase tracking-[0.16em] text-white">{color.name}</p>
                 <p className="mt-2 text-sm text-white/56">Live finish update on the floating hero model.</p>
               </div>
-              <span className="h-12 w-12 rounded-full border border-white/10" style={{ backgroundColor: color.value }} />
+              <span
+                className="h-12 w-12 rounded-full border border-white/10"
+                style={{ backgroundColor: color.value }}
+                aria-hidden="true"
+              />
             </button>
           ))}
         </div>

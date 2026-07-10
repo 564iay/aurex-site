@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Float, MeshTransmissionMaterial, Sparkles, useGLTF } from "@react-three/drei";
+import { AdaptiveDpr, Environment, Float, MeshTransmissionMaterial, Sparkles, useGLTF } from "@react-three/drei";
 import {
   Box3,
   Color,
@@ -32,13 +32,15 @@ type ProductCanvasProps = {
   scenePhase: ScenePhase;
   scrollProgress: number;
   luxMode: boolean;
+  isMobile?: boolean;
 };
 
 function SceneRig({
   selectedColor,
   scenePhase,
   scrollProgress,
-  luxMode
+  luxMode,
+  isMobile = false
 }: ProductCanvasProps) {
   const modelRef = useRef<Group>(null);
   const pointerRef = useRef({ x: 0, y: 0 });
@@ -183,8 +185,8 @@ function SceneRig({
         <planeGeometry args={[28, 28]} />
         <shadowMaterial opacity={0.22} />
       </mesh>
-      <Sparkles count={160} scale={[10, 5, 8]} size={2.4} speed={0.5} color="#d7b46a" />
-      <Sparkles count={80} scale={[8, 4, 7]} size={1.7} speed={0.25} color="#7aa4d8" />
+      <Sparkles count={isMobile ? 60 : 160} scale={[10, 5, 8]} size={2.4} speed={0.5} color="#d7b46a" />
+      <Sparkles count={isMobile ? 30 : 80} scale={[8, 4, 7]} size={1.7} speed={0.25} color="#7aa4d8" />
       <Environment preset="city" />
     </>
   );
@@ -217,11 +219,27 @@ function SoundHalo({ active }: { active: boolean }) {
 }
 
 export default function ProductCanvas(props: ProductCanvasProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   return (
     <div className="pointer-events-none fixed inset-0 z-0">
-      <Canvas camera={{ position: [0, 0.4, 7.8], fov: 34 }} dpr={[1, 1.8]} shadows>
+      <Canvas
+        camera={{ position: [0, 0.4, 7.8], fov: 34 }}
+        dpr={[1, isMobile ? 1.2 : 1.5]}
+        shadows
+        performance={{ min: 0.5 }}
+      >
+        <AdaptiveDpr pixelated />
         <Suspense fallback={null}>
-          <SceneRig {...props} />
+          <SceneRig {...props} isMobile={isMobile} />
           <SoundHalo active={props.scenePhase === "sound"} />
         </Suspense>
       </Canvas>
